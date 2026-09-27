@@ -37,19 +37,29 @@ flowchart TD
     C -- passes --> E[Save lesson, return report]
 ```
 
-## Requirement map
+## Project structure
 
-Search for `# REQUIREMENT:` in `agent/` to find each one in the code.
+```
+.
+├── README.md
+├── requirements.txt       # Pinned dependencies
+├── .env.example           # API keys to copy into .env
+├── notebook.ipynb         # Final report notebook
+├── agent/
+│   ├── __init__.py        # Package overview and import order
+│   ├── config.py          # Env vars, shared model, paths, eval settings
+│   ├── prompts.py         # All system prompts
+│   ├── tools.py           # Layer 1: API tools (yfinance, NewsAPI, FRED, EDGAR)
+│   ├── memory.py          # Notes saved across runs
+│   ├── workflows.py       # News prompt chain and report evaluator
+│   ├── subagents.py       # Layer 2: earnings, news, market agents
+│   └── supervisor.py      # Layer 3: supervisor and run() entry point
+└── memory/
+    └── notes.json         # Stored lessons from past runs
+```
 
-| Requirement | File | How |
-|---|---|---|
-| Planning | `supervisor.py`, `prompts.py` | Supervisor prompt requires a numbered research plan before any tool call |
-| Dynamic tool use | `tools.py`, `subagents.py` | Each subagent chooses among its own API tools |
-| Self-reflection | `workflows.py`, `supervisor.py` | Evaluator scores the draft report |
-| Learning across runs | `memory.py`, `supervisor.py` | Notes loaded at the start of `run()`, lesson saved at the end |
-| Prompt chaining | `workflows.py` | Ingest → preprocess → classify → extract → summarize, exposed as a tool for the news subagent |
-| Routing | `supervisor.py` | Supervisor chooses among the wrapped subagent tools |
-| Evaluator–optimizer | `workflows.py`, `supervisor.py` | Generate → evaluate → refine loop in `run()`, max 3 rounds |
+Course requirements are tagged in the code with `# REQUIREMENT:`. Find them
+with `grep -rn "REQUIREMENT:" agent/`.
 
 ## Setup
 
