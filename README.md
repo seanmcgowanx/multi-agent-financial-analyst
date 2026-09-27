@@ -18,42 +18,24 @@ flowchart TD
     M --> MT[yfinance, FRED]
 ```
 
-The order of one run is shown below. The evaluator is a single LLM call
-made by `run()`, not an agent and not called by the supervisor.
-
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant R as run()
-    participant S as Supervisor
-    participant A as Subagents
-    participant E as Evaluator
-    participant M as notes.json
-
-    U->>R: ticker
-    R->>M: load notes
-    R->>S: ticker + notes
-    S->>A: delegate (earnings / news / market)
-    A-->>S: summaries
-    S-->>R: draft report
-    loop up to 3 rounds, stop when passed
-        R->>E: report
-        E-->>R: score + feedback
-        opt failed
-            R->>S: feedback (same thread)
-            S-->>R: revised report
-        end
-    end
-    R->>M: save lesson
-    R-->>U: final report + score log
-```
-
 - **Layer 1: Tools** (`agent/tools.py`): `@tool` functions that call external
   APIs.
 - **Layer 2: Subagents** (`agent/subagents.py`): specialist agents, each
   wrapped as a tool.
 - **Layer 3: Supervisor** (`agent/supervisor.py`): plans, routes to
   subagents, and synthesizes the report.
+
+Each run then goes through a review loop. The evaluator is a single LLM
+call, not an agent.
+
+```mermaid
+flowchart TD
+    A[Load past notes] --> B[Supervisor and subagents write draft]
+    B --> C[Evaluator scores draft]
+    C -- fails, up to 3 rounds --> D[Supervisor revises using feedback]
+    D --> C
+    C -- passes --> E[Save lesson, return report]
+```
 
 ## Requirement map
 
