@@ -16,8 +16,36 @@ flowchart TD
     E --> ET[yfinance, SEC EDGAR]
     N --> NT[NewsAPI, news pipeline]
     M --> MT[yfinance, FRED]
-    S --> V[Evaluator]
-    V -- feedback --> S
+```
+
+The order of one run is shown below. The evaluator is a single LLM call
+made by `run()`, not an agent and not called by the supervisor.
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant R as run()
+    participant S as Supervisor
+    participant A as Subagents
+    participant E as Evaluator
+    participant M as notes.json
+
+    U->>R: ticker
+    R->>M: load notes
+    R->>S: ticker + notes
+    S->>A: delegate (earnings / news / market)
+    A-->>S: summaries
+    S-->>R: draft report
+    loop up to 3 rounds, stop when passed
+        R->>E: report
+        E-->>R: score + feedback
+        opt failed
+            R->>S: feedback (same thread)
+            S-->>R: revised report
+        end
+    end
+    R->>M: save lesson
+    R-->>U: final report + score log
 ```
 
 - **Layer 1: Tools** (`agent/tools.py`): `@tool` functions that call external
