@@ -62,8 +62,6 @@ Open `code_notebook.ipynb` and run all cells.
 | Ivan | Earnings + market | `specialists/earnings.py`, `specialists/market.py`, their tools (yfinance, EDGAR, FRED), `workflows.Evaluator` |
 | Carlo | News + notebook | `specialists/news.py`, `workflows.NewsChain`, NewsAPI tool, notebook visualizations and HTML export |
 
-Everyone writes the notebook cells and comments for the code they own.
-
 ## Course info
 
 University of San Diego, Applied AI 520 Final Team Project.
