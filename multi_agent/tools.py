@@ -12,5 +12,8 @@ tools by name via the JSON protocol in prompts.TOOL_PROTOCOL.
 # get_fred_series(series_id)             -- FRED (e.g. FEDFUNDS, CPIAUCSL)
 # Add more freely (Alpha Vantage, Kaggle datasets, ...).
 
-# TOOLS = {"get_price_history": {"fn": ..., "description": "..."}, ...}
+# Registry: {"get_price_history": {"fn": get_price_history,
+#   "description": "get_price_history(ticker, period='6mo'): ..."}}
+# The description is all the model sees, so include the call signature.
+TOOLS = {}
 # Specialists receive a subset of TOOLS.

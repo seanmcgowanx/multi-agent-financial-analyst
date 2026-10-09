@@ -23,7 +23,7 @@ DEFAULT_MODEL = "gpt-6-luna"
 # MAX_ROUNDS = 
 
 # Tools
-MAX_TOOL_STEPS = 10
+MAX_TOOL_STEPS = 6
 
 # Memory
 RUN_LOG_PATH = Path(__file__).resolve().parent.parent / "memory" / "run_log.jsonl"

@@ -1,8 +1,17 @@
 """All system prompts and prompt templates."""
 
-# TOOL_PROTOCOL: tells an agent to reply with ONE JSON object per turn:
-#   {"tool": "<name>", "args": {...}}  to call a tool, or
-#   {"final": "<answer>"}              when done.
+# Appended to a tool-using agent's prompt by Agent.use_tools.
+TOOL_PROTOCOL = """You can call these tools:
+{tool_descriptions}
+
+Reply with exactly ONE JSON object and nothing else, in one of two forms:
+  {{"thought": "<why>", "tool": "<tool name>", "args": {{<keyword args>}}}}
+  {{"thought": "<why>", "final": "<your answer to the task>"}}
+
+Call one tool per reply. You will see each tool's result before your next
+reply. Give a final answer once you have enough information; do not repeat a
+call you have already made."""
+
 # COORDINATOR_PLAN: given ticker + past run log, return JSON steps, each
 #   tagged with a specialist: [{"specialist": "earnings|news|market", "task": "..."}]
 # COORDINATOR_SYNTHESIZE / COORDINATOR_REVISE: write report; revise with feedback.
