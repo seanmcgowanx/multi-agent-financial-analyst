@@ -31,7 +31,7 @@ Agents pick tools by replying with JSON (`{"tool": ..., "args": ...}` or
 
 ```
 .
-├── code_notebook.ipynb    # Deliverable (exported to PDF)
+├── code_notebook.ipynb    # Deliverable (exported to HTML)
 ├── agent/
 │   ├── config.py          # Env, OpenAI client, default model, paths, eval settings
 │   ├── prompts.py         # All prompts
@@ -61,10 +61,14 @@ Open `code_notebook.ipynb` and run all cells. (The code is a scaffold and is not
 
 ## Team and roles
 
-| Name | Owns |
-|---|---|
-| TBD | TBD |
+| Name | Role | Owns |
+|---|---|---|
+| Sean McGowan | Foundation + orchestration | `config.py`, `base.py`, `memory.py`, `coordinator.py`, `team.py` |
+| Ivan | Earnings + market | `specialists/earnings.py`, `specialists/market.py`, their tools (yfinance, EDGAR, FRED), `workflows.Evaluator` |
+| Carlo | News + notebook | `specialists/news.py`, `workflows.NewsChain`, NewsAPI tool, notebook visualizations and HTML export |
+
+Everyone writes the notebook cells and comments for the code they own.
 
 ## Course info
 
-University of San Diego, Applied AI, Final Team Project.
+University of San Diego, Applied AI 520 Final Team Project.
