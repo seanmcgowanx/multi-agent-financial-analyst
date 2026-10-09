@@ -31,7 +31,7 @@ Agents pick tools by replying with JSON (`{"tool": ..., "args": ...}` or
 
 ```
 .
-├── final_report.ipynb     # Deliverable (exported to PDF)
+├── code_notebook.ipynb    # Deliverable (exported to PDF)
 ├── agent/
 │   ├── config.py          # Env, OpenAI client, default model, paths, eval settings
 │   ├── prompts.py         # All prompts
@@ -57,7 +57,7 @@ cp .env.example .env  # fill in keys
 
 ## How to run
 
-Open `final_report.ipynb` and run all cells. (The code is a scaffold and is not implemented yet.)
+Open `code_notebook.ipynb` and run all cells. (The code is a scaffold and is not implemented yet.)
 
 ## Team and roles
 
