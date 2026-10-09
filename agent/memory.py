@@ -1,8 +1,6 @@
-"""Persistent notes for learning across runs."""
+"""Learning across runs: an append-only run log at memory/run_log.jsonl."""
 
-# REQUIREMENT: Learning across runs - notes saved here persist to disk.
-# Note: {ticker, date, lesson, score}
-
-# load_notes(ticker=None)
-# save_note(ticker, lesson)
-# read_notes - optional @tool
+# REQUIREMENT: Learns across runs
+# append_run(ticker, score, rounds, lesson)  -- one JSON line per run.
+# recent_runs(n, ticker=None)                -- last n entries, optionally by ticker,
+#                                               formatted for the coordinator's plan prompt.

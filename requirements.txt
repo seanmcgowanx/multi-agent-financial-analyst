@@ -1,10 +1,9 @@
-# Pinned deliberately. LangChain's API changes between releases.
-langchain==1.4.2
-langchain-core==1.6.5
-langchain-openai==1.6.6
-langgraph==1.2.12
-yfinance==1.7.0
-fredapi==0.5.2
-requests==2.34.2
-python-dotenv==1.2.3
-ruff==0.16.9
+openai
+yfinance
+fredapi
+requests
+python-dotenv
+pandas
+matplotlib
+jupyter
+ruff

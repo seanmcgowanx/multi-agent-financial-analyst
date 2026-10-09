@@ -1,10 +1,15 @@
-"""Deterministic workflows: news prompt chain and report evaluator."""
+"""Non-routing workflow patterns: the news prompt chain and the evaluator."""
 
-# REQUIREMENT: Prompt Chaining - fixed sequence of LLM steps below.
-# ingest -> preprocess -> classify -> extract -> summarize
-# news_pipeline(ticker) - @tool for the news subagent
+# REQUIREMENT: Prompt Chaining
+# class NewsChain:  Ingest -> Preprocess -> Classify -> Extract -> Summarize
+#     ingest(ticker)       -- tools.get_company_news (no LLM)
+#     preprocess(articles) -- LLM: dedupe, strip boilerplate
+#     classify(articles)   -- LLM: label each (earnings, product, legal, macro, ...)
+#                             + sentiment
+#     extract(articles)    -- LLM: key facts, numbers, entities
+#     summarize(extracted) -- LLM: concise news brief
+#     run(ticker) -> dict of every intermediate step (for the notebook demo)
 
-# REQUIREMENT: Self-reflection - the evaluator critiques the draft.
-# REQUIREMENT: Evaluator-Optimizer - this is the "evaluator" half.
-# Evaluation(score: int, feedback: str, passed: bool)
-# evaluate_report(report) - model.with_structured_output(Evaluation)
+# REQUIREMENT: Evaluator-Optimizer (evaluate half; the refine loop is in team.py)
+# class Evaluator(Agent):
+#     evaluate(report, ticker) -> {"score": int, "feedback": str}

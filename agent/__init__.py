@@ -1,8 +1,5 @@
-"""Investment research agent: tools -> subagents -> supervisor.
+"""Investment Research Agent package.
 
-Import order is one-way: config -> prompts -> tools -> memory ->
-workflows -> subagents -> supervisor.
-
-"# REQUIREMENT: <name>" comments mark where each course rubric item is
-implemented. Find them all with: grep -rn "REQUIREMENT:" agent/
+Import order is one-way:
+config -> prompts -> tools -> memory -> base -> workflows -> specialists -> coordinator -> team
 """
