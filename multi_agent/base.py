@@ -1,17 +1,10 @@
-"""Base Agent class
+"""Base Agent class. Every agent subclasses it and shares one OpenAI client.
 
-- every agent subclasses Agent and shares one OpenAI client.
-- model defaults to DEFAULT_MODEL; whoever builds an agent picks its model.
-- prefer reasoning effort to control outputs over temperature/top-k/top-p
-
-Notes:
-- process is the generic entry point used by Coordinator.route and send_to.
-  Specialists override it (e.g. to run use_tools or NewsChain) and should
-  still append {"task", "result"} to self.memory.
-- self.memory is in-session history only. Cross-run memory is memory.py.
-- use_tools runs the ReAct-style tool loop: the model replies with
-  JSON ({"thought", "tool", "args"} or {"final"}), the tool runs from
-  tools.TOOLS, and the observation is fed back, up to config.MAX_TOOL_STEPS.
+- model defaults to DEFAULT_MODEL; use reasoning_effort, not temperature.
+- Specialists override process and should still append to self.memory
+  (in-session only; cross-run memory is memory.py).
+- use_tools is a ReAct loop: JSON tool calls, run from TOOLS, results fed
+  back, up to MAX_TOOL_STEPS. Steps are kept in self.last_trace.
 """
 
 import json
