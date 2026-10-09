@@ -12,7 +12,6 @@ Plain prompt in, text out; no function-calling API.
 #     send_to(other_agent, message) -> str      -- lab-style handoff
 #
 #     use_tools(task) -> str
-#         REQUIREMENT: Uses tools dynamically
 #         Loop up to MAX_TOOL_STEPS:
 #           prompt = role + TOOL_PROTOCOL + tool descriptions + task + observations
 #           parse JSON reply; if "tool": run TOOLS[name]["fn"](**args), append
