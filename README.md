@@ -39,7 +39,7 @@ Agents pick tools by replying with JSON (`{"tool": ..., "args": ...}` or
 │   ├── memory.py          # Append-only run log
 │   ├── base.py            # Agent base class (from the lab) + tool loop
 │   ├── workflows.py       # NewsChain (prompt chaining), Evaluator
-│   ├── specialists/       # earnings.py, news.py, market.py (one owner each)
+│   ├── specialists/       # earnings.py, news.py, market.py 
 │   ├── coordinator.py     # Plan, route, synthesize, revise
 │   └── team.py            # InvestmentResearchTeam.run(ticker)
 └── memory/run_log.jsonl
@@ -57,7 +57,7 @@ cp .env.example .env  # fill in keys
 
 ## How to run
 
-Open `code_notebook.ipynb` and run all cells. (The code is a scaffold and is not implemented yet.)
+Open `code_notebook.ipynb` and run all cells. 
 
 ## Team and roles
 
