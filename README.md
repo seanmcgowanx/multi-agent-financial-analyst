@@ -29,7 +29,7 @@ flowchart TD
 ```
 .
 ├── code_notebook.ipynb    # Deliverable (exported to HTML)
-├── agent/
+├── multi_agent/
 │   ├── config.py          # Env, OpenAI client, default model, paths, eval settings
 │   ├── prompts.py         # All prompts
 │   ├── tools.py           # Data API functions + TOOLS registry
