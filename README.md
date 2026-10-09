@@ -24,9 +24,6 @@ flowchart TD
     V -- passes --> L[Append run to log, return report]
 ```
 
-Agents pick tools by replying with JSON (`{"tool": ..., "args": ...}` or
-`{"final": ...}`), so any chat model works for any agent.
-
 ## Project structure
 
 ```
@@ -44,8 +41,6 @@ Agents pick tools by replying with JSON (`{"tool": ..., "args": ...}` or
 │   └── team.py            # InvestmentResearchTeam.run(ticker)
 └── memory/run_log.jsonl
 ```
-
-Find course requirements with `grep -rn "REQUIREMENT:" agent/`.
 
 ## Setup
 
