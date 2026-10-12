@@ -1,7 +1,8 @@
 """InvestmentResearchTeam: wires agents together and exposes run(). Mirrors the lab's MultiAgentTeam."""
 
 # class InvestmentResearchTeam:
-#     __init__: Coordinator, specialists, Evaluator
+#     __init__: specialists = {label: cls() for label, cls in SPECIALISTS.items()}
+#               Coordinator(specialists), Evaluator
 #
 #     run(ticker) -> dict
 #         0. ticker = ticker.strip().upper(); raise ValueError if it has no price
