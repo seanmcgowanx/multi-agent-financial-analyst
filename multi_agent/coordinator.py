@@ -23,5 +23,12 @@ class Coordinator(Agent):
         )
 
     def plan(self, ticker, lessons):
+        """Returns the plan's steps. The model replies with:
+        {
+            "steps": [
+                {"specialist": "earnings|news|market", "task": "<task>"}
+            ]
+        }
+        """
         prompt = COORDINATOR_PLAN.format(ticker=ticker, lessons=lessons)
         return json.loads(self.call_llm(prompt, json_mode=True))["steps"]
