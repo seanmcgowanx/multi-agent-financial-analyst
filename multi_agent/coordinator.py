@@ -36,8 +36,9 @@ class Coordinator(Agent):
 
     def route(self, step, ticker):
         label = step["specialist"]
+        task = step["task"]
         if label not in self.specialists:
             return f"Unknown specialist {label!r}; valid: {', '.join(self.specialists)}"
 
-        print(f"{self.name} -> {label}: {step['task'][:40]}...")
-        return self.specialists[label].analyze(step["task"], ticker)
+        print(f"{self.name} -> {label}: {task[:40]}...")
+        return self.specialists[label].analyze(task, ticker)
