@@ -1,11 +1,9 @@
-"""Base Agent class. Every agent subclasses it and shares one OpenAI client.
+"""Base Agent class: every agent subclasses it and shares one OpenAI client."""
 
-- model defaults to DEFAULT_MODEL; use reasoning_effort, not temperature.
-- Specialists override process and should still append to self.memory
-  (in-session only; cross-run memory is memory.py).
-- use_tools is a ReAct loop: JSON tool calls, run from TOOLS, results fed
-  back, up to MAX_TOOL_STEPS. Steps are kept in self.last_trace.
-"""
+# call_llm(prompt, ...)    -- one LLM call; use reasoning_effort, not temperature.
+# process(task)            -- specialists replace this; Coordinator.route calls it via send_to.
+# send_to(other, message)  -- hands a message to another agent's process.
+# use_tools(task)          -- ReAct tool loop, up to MAX_TOOL_STEPS; steps kept in self.last_trace.
 
 import json
 

@@ -1,13 +1,9 @@
-"""Coordinator: plans, routes steps to specialists, writes/revises the report."""
+"""Coordinator: plans, routes steps to specialists, writes and revises the report."""
 
-# class Coordinator(Agent):
-#     plan(ticker, lessons) -> list[{"specialist", "task"}]
-#
-#     route(step, ticker) -> str   -- send_to(self.specialists[step["specialist"]], ...)
-#                                     unknown label -> returns an error string
-#
-#     synthesize(ticker, findings) -> str            -- draft report
-#     revise(report, feedback, findings) -> str      -- optimizer half of eval loop
+# plan(ticker, lessons)              -- list of {"specialist", "task"} steps.
+# route(step, ticker)                -- sends the step to its specialist via send_to; error string if unknown.
+# synthesize(ticker, findings)       -- draft report from the specialists' findings.
+# revise(report, feedback, findings) -- optimizer half of the eval loop (not written yet).
 
 import json
 
