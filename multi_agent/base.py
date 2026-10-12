@@ -29,6 +29,7 @@ class Agent:
         self.memory = []  # in-session history of {"task", "result"}
 
     def call_llm(self, prompt, max_tokens=None, reasoning_effort=None, json_mode=False):
+        """Returns the model's reply as a string (a JSON string with json_mode)."""
         # Reasoning effort and max_tokens only sent to api when set
         kwargs = {}
         if json_mode:
@@ -57,21 +58,28 @@ class Agent:
         return response.choices[0].message.content
 
     def process(self, task):
+        """Returns the model's answer to the task as text (one LLM call, no tools).
+
+        Overridden by EarningsAnalyst and MarketAnalyst (Ivan: self.use_tools(task))
+        and NewsAnalyst (Carlo: runs NewsChain). Coordinator.route reaches it
+        through send_to.
+        """
         prompt = f"As a {self.role}, {task}"
         result = self.call_llm(prompt)
         self.memory.append({"task": task, "result": result})
         return result
 
     def send_to(self, other_agent, message):
-
+        """Returns other_agent.process(...) on the message: the other agent's reply as text."""
         print(f"{self.name} -> {other_agent.name}: {message[:40]}...")
         return other_agent.process(f"Process this from {self.name}: {message}")
 
     def use_tools(self, task, reasoning_effort=None):
         """ReAct loop: the model picks a tool, we run it, and feed back the result.
 
-        Returns the final answer. The steps (thought, tool, args, result) are
-        kept in self.last_trace so the notebook can show the agent's decisions.
+        Returns the final answer as a string.
+        The steps (thought, tool, args, result) are kept in self.last_trace so
+        the notebook can show the agent's decisions.
         """
         descriptions = "\n".join(f"- {TOOLS[n]['description']}" for n in self.tools)
         protocol = TOOL_PROTOCOL.format(tool_descriptions=descriptions)

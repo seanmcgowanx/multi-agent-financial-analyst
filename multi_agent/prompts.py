@@ -29,7 +29,18 @@ a specific, answerable task.
 Reply with JSON only:
 {{"steps": [{{"specialist": "earnings|news|market", "task": "<task>"}}]}}"""
 
-# COORDINATOR_SYNTHESIZE / COORDINATOR_REVISE: write report; revise with feedback.
+# Coordinator.synthesize: turn the specialists' findings into the draft report.
+COORDINATOR_SYNTHESIZE = """Write an investment research report on {ticker} from
+these specialist findings:
+
+{findings}
+
+Use only facts and numbers from the findings; do not invent data. If a finding
+is an error or missing, say what could not be covered.
+
+Sections: Summary, Financials, News & Sentiment, Market, Risks, Outlook."""
+
+# COORDINATOR_REVISE: revise the report with the evaluator's feedback.
 # EARNINGS_ROLE, NEWS_ROLE, MARKET_ROLE: specialist role descriptions.
 # NEWS_CHAIN_*: one prompt per chain step (preprocess, classify, extract, summarize).
 # EVALUATOR: score 0-10 on a rubric, return JSON {"score", "feedback"}.

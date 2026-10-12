@@ -3,7 +3,7 @@
 # class Coordinator(Agent):
 #     plan(ticker, lessons) -> list[{"specialist", "task"}]
 #
-#     route(step, ticker) -> str   -- self.specialists[step["specialist"]].analyze(...)
+#     route(step, ticker) -> str   -- send_to(self.specialists[step["specialist"]], ...)
 #                                     unknown label -> returns an error string
 #
 #     synthesize(ticker, findings) -> str            -- draft report
@@ -12,7 +12,7 @@
 import json
 
 from multi_agent.base import Agent
-from multi_agent.prompts import COORDINATOR_PLAN
+from multi_agent.prompts import COORDINATOR_PLAN, COORDINATOR_SYNTHESIZE
 
 
 class Coordinator(Agent):
@@ -20,8 +20,9 @@ class Coordinator(Agent):
         super().__init__(
             name="Coordinator",
             role="financial research coordinator",
+            model="gpt-6-sol",
         )
-        self.specialists = specialists  # {label: specialist instance}, built by team
+        self.specialists = specialists
 
     def plan(self, ticker, lessons):
         """Returns the plan's steps. The model replies with:
@@ -32,13 +33,24 @@ class Coordinator(Agent):
         }
         """
         prompt = COORDINATOR_PLAN.format(ticker=ticker, lessons=lessons)
-        return json.loads(self.call_llm(prompt, json_mode=True))["steps"]
+        reply = self.call_llm(prompt, reasoning_effort="high", json_mode=True)
+        return json.loads(reply)["steps"]
 
     def route(self, step, ticker):
+        """Returns a string: the specialist's findings for this step, or an
+        error message if the label is unknown.
+        """
         label = step["specialist"]
         task = step["task"]
         if label not in self.specialists:
-            return f"Unknown specialist {label!r}; valid: {', '.join(self.specialists)}"
+            return f"Unknown specialist {label!r}"
 
-        print(f"{self.name} -> {label}: {task[:40]}...")
-        return self.specialists[label].analyze(task, ticker)
+        return self.send_to(self.specialists[label], f"{task} (ticker: {ticker})")
+
+    def synthesize(self, ticker, findings):
+        """Returns a string: the draft report, with sections:
+        Summary, Financials, News & Sentiment, Market, Risks, Outlook.
+        """
+        numbered = "\n\n".join(f"{i}. {f}" for i, f in enumerate(findings, 1))
+        prompt = COORDINATOR_SYNTHESIZE.format(ticker=ticker, findings=numbered)
+        return self.call_llm(prompt, reasoning_effort="high")
