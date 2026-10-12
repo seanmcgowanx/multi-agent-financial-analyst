@@ -12,8 +12,23 @@ Call one tool per reply. You will see each tool's result before your next
 reply. Give a final answer once you have enough information; do not repeat a
 call you have already made."""
 
-# COORDINATOR_PLAN: given ticker + past lessons, return JSON steps, each
-#   tagged with a specialist: [{"specialist": "earnings|news|market", "task": "..."}]
+# Coordinator.plan: break the analysis into steps, each tagged with a specialist.
+COORDINATOR_PLAN = """Plan a stock analysis of {ticker}.
+
+Specialists you can assign:
+- earnings: reported financials, SEC filings, earnings trends
+- news: recent news coverage and sentiment
+- market: price action, valuation, macro conditions
+
+Lessons from past runs (follow them):
+{lessons}
+
+Break the analysis into 3-6 steps. Each step goes to one specialist and names
+a specific, answerable task.
+
+Reply with JSON only:
+{{"steps": [{{"specialist": "earnings|news|market", "task": "<task>"}}]}}"""
+
 # COORDINATOR_SYNTHESIZE / COORDINATOR_REVISE: write report; revise with feedback.
 # EARNINGS_ROLE, NEWS_ROLE, MARKET_ROLE: specialist role descriptions.
 # NEWS_CHAIN_*: one prompt per chain step (preprocess, classify, extract, summarize).

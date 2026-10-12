@@ -4,6 +4,9 @@
 #     __init__: Coordinator, specialists, Evaluator
 #
 #     run(ticker) -> dict
+#         0. ticker = ticker.strip().upper(); raise ValueError if it has no price
+#            history (catches typos/fake tickers before any LLM call). Use Ivan's
+#            get_price_history once it exists, not yfinance directly.
 #         1. lessons = memory.get_lessons()
 #         2. plan = coordinator.plan(ticker, lessons)
 #         3. findings = [coordinator.route(step, ticker) for step in plan]

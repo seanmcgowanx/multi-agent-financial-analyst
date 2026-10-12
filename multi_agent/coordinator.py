@@ -8,3 +8,20 @@
 #
 #     synthesize(ticker, findings) -> str            -- draft report
 #     revise(report, feedback, findings) -> str      -- optimizer half of eval loop
+
+import json
+
+from multi_agent.base import Agent
+from multi_agent.prompts import COORDINATOR_PLAN
+
+
+class Coordinator(Agent):
+    def __init__(self):
+        super().__init__(
+            name="Coordinator",
+            role="financial research coordinator",
+        )
+
+    def plan(self, ticker, lessons):
+        prompt = COORDINATOR_PLAN.format(ticker=ticker, lessons=lessons)
+        return json.loads(self.call_llm(prompt, json_mode=True))["steps"]
