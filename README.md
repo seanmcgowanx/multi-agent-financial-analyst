@@ -11,7 +11,7 @@ framework.
 
 ```mermaid
 flowchart TD
-    M[(run_log.jsonl)] --> C[Coordinator: plan]
+    M[(lessons.jsonl)] --> C[Coordinator: plan]
     C -- route by label --> E[EarningsAnalyst]
     C -- route by label --> N[NewsAnalyst]
     C -- route by label --> K[MarketAnalyst]
@@ -21,7 +21,7 @@ flowchart TD
     E & N & K --> S[Coordinator: synthesize]
     S --> V[Evaluator]
     V -- fails, up to MAX_ROUNDS --> R[Coordinator: revise] --> V
-    V -- passes --> L[Append run to log, return report]
+    V -- passes --> L[Save lesson if the run needed revision, return report]
 ```
 
 ## Project structure
@@ -33,13 +33,13 @@ flowchart TD
 │   ├── config.py          # Env, OpenAI client, default model, paths, eval settings
 │   ├── prompts.py         # All prompts
 │   ├── tools.py           # Data API functions + TOOLS registry
-│   ├── memory.py          # Append-only run log
+│   ├── memory.py          # Append-only lesson log
 │   ├── base.py            # Agent base class (from the lab) + tool loop
 │   ├── workflows.py       # NewsChain (prompt chaining), Evaluator
 │   ├── specialists/       # earnings.py, news.py, market.py 
 │   ├── coordinator.py     # Plan, route, synthesize, revise
 │   └── team.py            # InvestmentResearchTeam.run(ticker)
-└── memory/run_log.jsonl
+└── memory/lessons.jsonl
 ```
 
 ## Setup

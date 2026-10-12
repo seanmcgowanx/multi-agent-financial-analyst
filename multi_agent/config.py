@@ -26,5 +26,5 @@ DEFAULT_MODEL = "gpt-6-luna"
 MAX_TOOL_STEPS = 6
 
 # Memory
-RUN_LOG_PATH = Path(__file__).resolve().parent.parent / "memory" / "run_log.jsonl"
+LESSONS_PATH = Path(__file__).resolve().parent.parent / "memory" / "lessons.jsonl"
 
