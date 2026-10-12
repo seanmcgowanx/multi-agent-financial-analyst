@@ -40,7 +40,21 @@ is an error or missing, say what could not be covered.
 
 Sections: Summary, Financials, News & Sentiment, Market, Risks, Outlook."""
 
-# COORDINATOR_REVISE: revise the report with the evaluator's feedback.
+# Coordinator.revise: rewrite the report to address the evaluator's feedback.
+COORDINATOR_REVISE = """Revise this investment research report to address the
+reviewer's feedback.
+
+Report:
+{report}
+
+Feedback:
+{feedback}
+
+Specialist findings:
+{findings}
+
+Use only facts and numbers from the findings; do not invent data. Keep the
+same sections. Return only the full revised report."""
 # EARNINGS_ROLE, NEWS_ROLE, MARKET_ROLE: specialist role descriptions.
 # NEWS_CHAIN_*: one prompt per chain step (preprocess, classify, extract, summarize).
 # EVALUATOR: score 0-10 on a rubric, return JSON {"score", "feedback"}.
