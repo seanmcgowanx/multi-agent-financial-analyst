@@ -1,7 +1,7 @@
 """Coordinator: plans, routes steps to specialists, writes/revises the report."""
 
 # class Coordinator(Agent):
-#     plan(ticker, past_runs) -> list[{"specialist", "task"}]
+#     plan(ticker, lessons) -> list[{"specialist", "task"}]
 #
 #     route(step, ticker) -> str   -- SPECIALISTS[step["specialist"]].analyze(...)
 #                                     unknown label -> fallback specialist + log it

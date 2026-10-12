@@ -12,10 +12,11 @@ Call one tool per reply. You will see each tool's result before your next
 reply. Give a final answer once you have enough information; do not repeat a
 call you have already made."""
 
-# COORDINATOR_PLAN: given ticker + past run log, return JSON steps, each
+# COORDINATOR_PLAN: given ticker + past lessons, return JSON steps, each
 #   tagged with a specialist: [{"specialist": "earnings|news|market", "task": "..."}]
 # COORDINATOR_SYNTHESIZE / COORDINATOR_REVISE: write report; revise with feedback.
 # EARNINGS_ROLE, NEWS_ROLE, MARKET_ROLE: specialist role descriptions.
 # NEWS_CHAIN_*: one prompt per chain step (preprocess, classify, extract, summarize).
 # EVALUATOR: score 0-10 on a rubric, return JSON {"score", "feedback"}.
-# LESSON: turn a finished run into a one-line lesson for the run log.
+# LESSON: one reusable lesson on how to plan/write (no company facts), or "NONE".
+#   Include memory.get_lessons(); reply NONE if the lesson is already covered there.
