@@ -25,12 +25,12 @@ class Agent:
         self.name = name
         self.role = role
         self.model = model
-        self.tools = tools or []  # names of TOOLS this agent may call
+        self.tools = tools or []
         self.memory = []  # in-session history of {"task", "result"}
 
     def call_llm(self, prompt, max_tokens=None, reasoning_effort=None, json_mode=False):
         """Returns the model's reply as a string (a JSON string with json_mode)."""
-        # Reasoning effort and max_tokens only sent to api when set
+        # Optionally set max_tokens, reasoning_effort, or json_mode
         kwargs = {}
         if json_mode:
             kwargs["response_format"] = {"type": "json_object"}
@@ -58,11 +58,10 @@ class Agent:
         return response.choices[0].message.content
 
     def process(self, task):
-        """Returns the model's answer to the task as text (one LLM call, no tools).
+        """Returns the model's answer to the task as a string (one LLM call, no tools).
 
-        Overridden by EarningsAnalyst and MarketAnalyst (Ivan: self.use_tools(task))
-        and NewsAnalyst (Carlo: runs NewsChain). Coordinator.route reaches it
-        through send_to.
+        Specialists replace this with their own version (tool calls or NewsChain),
+        because Coordinator.route calls process on every specialist through send_to.
         """
         prompt = f"As a {self.role}, {task}"
         result = self.call_llm(prompt)
