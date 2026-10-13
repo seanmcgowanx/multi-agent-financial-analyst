@@ -55,8 +55,29 @@ Specialist findings:
 
 Use only facts and numbers from the findings; do not invent data. Keep the
 same sections. Return only the full revised report."""
-# EARNINGS_ROLE, NEWS_ROLE, MARKET_ROLE: specialist role descriptions.
+
+# team.run: one reusable lesson after a first draft fails evaluation.
+LESSON = """A stock research report's first draft failed review.
+
+Plan used:
+{plan}
+
+Reviewer feedback:
+{feedback}
+
+Lessons already learned:
+{lessons}
+
+Write one short, reusable lesson on how to plan or write these reports better
+next time. It must apply to any company, so include no company facts or numbers.
+If the lesson is already covered above, reply only NONE."""
+
+# EARNINGS_ROLE: specialist role description
+
+# NEWS_ROLE: specialist role description
+
+# MARKET_ROLE: specialist role description
+
 # NEWS_CHAIN_*: one prompt per chain step (preprocess, classify, extract, summarize).
+
 # EVALUATOR: score 0-10 on a rubric, return JSON {"score", "feedback"}.
-# LESSON: one reusable lesson on how to plan/write (no company facts), or "NONE".
-#   Include memory.get_lessons(); reply NONE if the lesson is already covered there.
