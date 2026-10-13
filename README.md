@@ -38,7 +38,7 @@ flowchart TD
 │   ├── workflows.py       # NewsChain (prompt chaining), Evaluator
 │   ├── specialists/       # earnings.py, news.py, market.py 
 │   ├── coordinator.py     # Plan, route, synthesize, revise
-│   └── team.py            # InvestmentResearchTeam.run(ticker)
+│   └── team.py            # ResearchTeam.run(ticker)
 └── memory/lessons.jsonl
 ```
 
