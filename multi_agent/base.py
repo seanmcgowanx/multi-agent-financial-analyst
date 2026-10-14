@@ -8,7 +8,7 @@
 import json
 
 from multi_agent.config import DEFAULT_MODEL, MAX_TOOL_STEPS, client
-from multi_agent.prompts import TOOL_PROTOCOL
+from multi_agent.prompts import TOOL_PROTOCOL, TOOL_RULES
 from multi_agent.tools import TOOLS
 
 
@@ -119,7 +119,9 @@ class Agent:
 
         # If max steps is reached, ask for a final answer from what was gathered
         history = "\n".join(json.dumps(step) for step in self.last_trace)
+        # Repeat the tool descriptions and rules here, since the JSON protocol is left out
         final = self.call_llm(
+            f"Tools used:\n{descriptions}\n\n{TOOL_RULES}\n\n"
             f"Task: {task}\n\nTool results:\n{history}\n\n"
             "Answer the task using only these results.",
             reasoning_effort=reasoning_effort,

@@ -15,7 +15,7 @@ FRED_API_KEY = os.getenv("FRED_API_KEY")
 SEC_USER_AGENT = os.getenv("SEC_USER_AGENT")
 
 # LLM
-client = openai.OpenAI(api_key=OPENAI_API_KEY) 
+client = openai.OpenAI(api_key=OPENAI_API_KEY)
 DEFAULT_MODEL = "gpt-6-luna"
 
 # Evaluator
@@ -27,4 +27,3 @@ MAX_TOOL_STEPS = 6
 
 # Memory
 LESSONS_PATH = Path(__file__).resolve().parent.parent / "memory" / "lessons.jsonl"
-

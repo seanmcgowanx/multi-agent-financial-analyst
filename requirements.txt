@@ -1,6 +1,5 @@
 openai
 yfinance
-fredapi
 requests
 python-dotenv
 pandas
