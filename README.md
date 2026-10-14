@@ -21,7 +21,7 @@ flowchart TD
     E & N & K --> S[Coordinator: synthesize]
     S --> V[Evaluator]
     V -- fails, up to MAX_ROUNDS --> R[Coordinator: revise] --> V
-    V -- passes --> L[Save lesson if the run needed revision, return report]
+    V -- passes or MAX_ROUNDS reached --> L[Save lesson if the first draft failed, return latest draft]
 ```
 
 ## Project structure
@@ -36,7 +36,7 @@ flowchart TD
 │   ├── memory.py          # Append-only lesson log
 │   ├── base.py            # Agent base class (from the lab) + tool loop
 │   ├── workflows.py       # NewsChain (prompt chaining), Evaluator
-│   ├── specialists/       # earnings.py, news.py, market.py 
+│   ├── specialists/       # earnings.py, news.py, market.py
 │   ├── coordinator.py     # Plan, route, synthesize, revise
 │   └── team.py            # ResearchTeam.run(ticker)
 └── memory/lessons.jsonl
@@ -52,7 +52,7 @@ cp .env.example .env  # fill in keys
 
 ## How to run
 
-Open `code_notebook.ipynb` and run all cells. 
+Open `code_notebook.ipynb` and run all cells.
 
 ## Team and roles
 
