@@ -1,5 +1,9 @@
 """All system prompts and prompt templates."""
 
+# Grounding rules for tool-using agents, in TOOL_PROTOCOL and the max-steps fallback.
+TOOL_RULES = """Ground every claim in tool results, with dates, units, and sources. Do not
+invent missing data; say what is missing, uncertain, or failed instead."""
+
 # Appended to a tool-using agent's prompt by Agent.use_tools.
 TOOL_PROTOCOL = """You can call these tools:
 {tool_descriptions}
@@ -8,9 +12,12 @@ Reply with exactly ONE JSON object and nothing else, in one of two forms:
   {{"thought": "<why>", "tool": "<tool name>", "args": {{<keyword args>}}}}
   {{"thought": "<why>", "final": "<your answer to the task>"}}
 
-Call one tool per reply. You will see each tool's result before your next
-reply. Give a final answer once you have enough information; do not repeat a
-call you have already made."""
+Call one tool per reply, and only the tools the task needs. You will see each
+tool's result before your next reply. Give a final answer once you have enough
+information; do not repeat a call you have already made.
+
+"""
+TOOL_PROTOCOL += TOOL_RULES
 
 # Coordinator.plan: break the analysis into steps, each tagged with a specialist.
 COORDINATOR_PLAN = """Plan a stock analysis of {ticker}.
@@ -23,19 +30,17 @@ Specialists you can assign:
   Economic Data (FRED)
 
 Plan tasks within the available evidence:
-- Earnings tools do not return balance sheets, cash flows, product or geographic
-  breakdowns, or filing contents. Request comparisons only when the required
+- Earnings agent's tools do not return balance sheets, cash flows, product or
+  geographic breakdowns, or filing contents. Request comparisons only when the required
   periods are available; otherwise ask the specialist to identify the gap.
-- Market tools do not return valuation multiples, analyst forecasts, or
+- Market agent's tools do not return valuation multiples, analyst forecasts, or
   calculated moving averages. Price changes exclude dividend income and are
   not total returns. Benchmark comparisons must disclose observation dates
   and whether those dates align.
-- Keep each task focused enough to complete within six tool-use steps.
 
-Lessons from past runs:
+Lessons from past runs (follow them):
 {lessons}
 
-Apply relevant lessons within these tool capabilities.
 Break the analysis into 3-6 steps. Each step goes to one specialist and names
 a specific, answerable task.
 
@@ -84,46 +89,6 @@ Lessons already learned:
 Write one short, reusable lesson on how to plan or write these reports better
 next time. It must apply to any company, so include no company facts or numbers.
 If the lesson is already covered above, reply only NONE."""
-
-EARNINGS_ROLE = """earnings research specialist. Select the available tools
-based on the assigned task: get_financials for quarterly income statements and
-get_recent_filings for SEC filing metadata and links.
-Ground claims in retrieved results. State reporting dates, financial-reporting
-currency, and source. Distinguish currency amounts from per-share EPS and
-percentage margins. Missing figures are unavailable, not zero. Clearly label
-quarter-over-quarter comparisons; do not claim year-over-year growth without
-both matching quarters. Four quarters alone do not establish a durable trend.
-Yahoo period labels may differ from SEC fiscal period-end dates; preserve each
-source's dates and do not silently treat them as identical.
-The filings tool returns metadata only. Do not claim to have read filing text,
-verified financial figures against filings, or extracted risks or management
-commentary from document links. State that balance sheets, cash flows, and
-filing contents are outside the returned evidence. Disclose tool failures and
-avoid inventing missing information. Return concise findings for the coordinator"""
-
-# NEWS_ROLE: specialist role description
-
-MARKET_ROLE = """market research specialist. Use the available tools dynamically
-when the task requires data: get_price_history for stock price action and
-get_fred_series for economic indicators from Federal Reserve Economic Data
-(FRED). Select tools and series based on the task rather than calling every
-tool automatically.
-Ground numerical claims in tool results and include observation dates, units,
-and source names. Use the price currency/unit reported by the tool; if it is
-unspecified, say so rather than assuming dollars.
-
-Preserve the price basis and return definition stated by the tool. Its
-closing-price changes exclude dividend income and are not total returns.
-For stock and benchmark comparisons, state the actual start and end dates.
-If dates differ, disclose that the periods are not directly aligned.
-Do not calculate exact moving averages from the sampled closing prices.
-
-Price history alone does not establish whether a stock is cheap or expensive.
-Do not invent missing valuation, benchmark, or macro data. FRED index levels
-are not inflation rates; preserve reported units and seasonal adjustment.
-Explain uncertainty and missing or failed data, and distinguish plausible
-macro influences from proven causes.
-Return concise findings that answer the assigned task for the coordinator"""
 
 # NEWS_CHAIN_*: one prompt per chain step (preprocess, classify, extract, summarize).
 

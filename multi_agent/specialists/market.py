@@ -1,7 +1,6 @@
 """Market specialist: price action, valuation context, macro backdrop."""
 
 from multi_agent.base import Agent
-from multi_agent.prompts import MARKET_ROLE
 
 
 class MarketAnalyst(Agent):
@@ -10,7 +9,7 @@ class MarketAnalyst(Agent):
     def __init__(self):
         super().__init__(
             name="Market Analyst",
-            role=MARKET_ROLE,
+            role="market research specialist",
             tools=["get_price_history", "get_fred_series"],
         )
 

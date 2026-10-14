@@ -20,9 +20,14 @@ from multi_agent.config import FRED_API_KEY, SEC_USER_AGENT
 
 
 def get_price_history(ticker, period="6mo"):
-    """Returns a string: start/end close, % change, high/low close, average
-    volume, and about 20 evenly spaced closes over the period. Raises ValueError
-    if there is no data (invalid or delisted ticker)."""
+    """Returns a string: start/end dates and closes, % change, high/low close,
+    average volume, price currency, price and return basis, count of missing
+    closes dropped, and about 20 evenly spaced closes over the period.
+
+    Closes are not dividend-adjusted (auto_adjust=False), so % change is a
+    price change, not a total return. Raises ValueError if there is no data
+    (invalid or delisted ticker) or no valid closing prices.
+    """
     stock = yf.Ticker(ticker)
     history_df = stock.history(period=period, auto_adjust=False)
 
@@ -100,10 +105,14 @@ def get_financials(ticker):
         return f"{value / revenue * 100:.2f}%"
 
     lines = [
-        f"{ticker}: {len(statement.columns)} latest available quarterly "
-        "income statements (newest first).",
-        f"Financial-reporting currency: {currency}. Amounts are in currency "
-        "units, not millions; diluted EPS is currency per share.",
+        (
+            f"{ticker}: {len(statement.columns)} latest available quarterly "
+            "income statements (newest first)."
+        ),
+        (
+            f"Financial-reporting currency: {currency}. Amounts are in currency "
+            "units, not millions; diluted EPS is currency per share."
+        ),
     ]
     available = False
     for date, column in statement.items():
@@ -112,9 +121,10 @@ def get_financials(ticker):
         operating_income = number(column, "OperatingIncome")
         net_income = number(column, "NetIncome")
         eps = number(column, "DilutedEPS")
-        available |= any(value is not None for value in (
-            revenue, gross_profit, operating_income, net_income, eps
-        ))
+        available |= any(
+            value is not None
+            for value in (revenue, gross_profit, operating_income, net_income, eps)
+        )
         lines.append(
             f"Quarter ended {date:%Y-%m-%d}: revenue {amount(revenue)}; "
             f"gross margin {margin(gross_profit, revenue)}; "
@@ -149,7 +159,8 @@ def get_recent_filings(ticker, form_type="10-Q"):
     headers = {"User-Agent": SEC_USER_AGENT}
     response = requests.get(
         "https://www.sec.gov/files/company_tickers.json",
-        headers=headers, timeout=20,
+        headers=headers,
+        timeout=20,
     )
     response.raise_for_status()
     companies = response.json()
@@ -161,17 +172,18 @@ def get_recent_filings(ticker, form_type="10-Q"):
     cik = int(company["cik_str"])
     response = requests.get(
         f"https://data.sec.gov/submissions/CIK{cik:010d}.json",
-        headers=headers, timeout=20,
+        headers=headers,
+        timeout=20,
     )
     response.raise_for_status()
     recent = response.json()["filings"]["recent"]
-    matches = [
-        i for i, form in enumerate(recent["form"]) if form == form_type
-    ]
+    matches = [i for i, form in enumerate(recent["form"]) if form == form_type]
     matches.sort(key=lambda i: recent["filingDate"][i], reverse=True)
     lines = [
-        f"SEC EDGAR: {company['title']} ({ticker}), CIK {cik:010d}; "
-        f"up to five recent {form_type} filings (exact form match)."
+        (
+            f"SEC EDGAR: {company['title']} ({ticker}), CIK {cik:010d}; "
+            f"up to five recent {form_type} filings (exact form match)."
+        )
     ]
     for i in matches[:5]:
         accession = recent["accessionNumber"][i]
@@ -239,9 +251,7 @@ def get_fred_series(series_id):
     valid = [row for row in observations if row["value"] != "."]
     if not valid:
         raise ValueError("FRED returned no available recent observations")
-    points = "; ".join(
-        f"{row['date']}: {row['value']}" for row in reversed(valid)
-    )
+    points = "; ".join(f"{row['date']}: {row['value']}" for row in reversed(valid))
     missing = len(observations) - len(valid)
     return (
         f"FRED {series_id}: {info['title']}\n"
@@ -262,7 +272,11 @@ TOOLS = {
             "get_recent_filings(ticker, form_type='10-Q'): Up to five recent "
             "SEC EDGAR filings, with filing dates, report periods, accession "
             "numbers and document links. Exact form match (10-Q, 10-K, 8-K, "
-            "or amendments such as 10-Q/A). Metadata only, not filing text."
+            "or amendments such as 10-Q/A). Metadata only, not filing text: "
+            "do not claim to have read a filing, verified figures against it, "
+            "or extracted risks or management commentary from it. SEC report "
+            "periods may differ from Yahoo quarter labels; keep each source's "
+            "dates."
         ),
     },
     "get_financials": {
@@ -271,7 +285,12 @@ TOOLS = {
             "get_financials(ticker): Up to four recent quarterly income "
             "statements: revenue, gross and operating margins, net income, "
             "diluted EPS, period-end dates, and financial-reporting currency. "
-            "Missing values are labeled; excludes balance sheet and cash flow."
+            "Excludes balance sheet and cash flow. When citing, state period "
+            "dates, currency, and source, and keep currency amounts, per-share "
+            "EPS, and percentage margins distinct. Unavailable values are not "
+            "zero. Label quarter-over-quarter comparisons as such; claim "
+            "year-over-year growth only with both matching quarters. Four "
+            "quarters alone do not establish a durable trend."
         ),
     },
     "get_fred_series": {
@@ -280,7 +299,9 @@ TOOLS = {
             "get_fred_series(series_id): Get up to 13 recent FRED observations "
             "with dates, original units, frequency, and seasonal adjustment. "
             "Examples: FEDFUNDS (interest rate), UNRATE (unemployment rate), "
-            "CPIAUCSL (consumer price index level, NOT an inflation rate)."
+            "CPIAUCSL (consumer price index level, NOT an inflation rate). "
+            "When citing, keep the reported units and adjustment, and treat "
+            "macro links to a stock as plausible influences, not proven causes."
         ),
     },
     "get_price_history": {
@@ -288,7 +309,13 @@ TOOLS = {
         "description": (
             "get_price_history(ticker, period='6mo'): Returns a price summary "
             "(start/end close, % change, high/low, avg volume, ~20 sampled closes). "
-            "period: 1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max."
+            "period: 1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max. "
+            "% change is a price change excluding dividends, not a total return. "
+            "Use the reported currency; if unspecified, say so. When comparing "
+            "to a benchmark, state each series' actual start and end dates and "
+            "whether they align. Do not compute moving averages from the "
+            "sampled closes. Price history alone does not show whether a stock "
+            "is cheap or expensive."
         ),
     },
 }

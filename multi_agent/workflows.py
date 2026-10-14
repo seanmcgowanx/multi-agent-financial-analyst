@@ -27,8 +27,9 @@ class Evaluator(Agent):
     def evaluate(self, report, ticker):
         """Return a validated score (1-10) and actionable feedback.
 
-        Invalid inputs or model output raise ValueError. API failures propagate
-        from call_llm; they must not be mistaken for a report quality score.
+        Invalid inputs or model output raise ValueError (TypeError if the reply
+        is not a JSON object). API failures propagate from call_llm; they must
+        not be mistaken for a report quality score.
         Only successful evaluations are recorded in session memory.
         """
         if not isinstance(report, str) or not report.strip():
@@ -45,7 +46,7 @@ class Evaluator(Agent):
             raise ValueError("Evaluator response must be valid JSON") from exc
 
         if not isinstance(result, dict):
-            raise ValueError("Evaluator response must be a JSON object")
+            raise TypeError("Evaluator response must be a JSON object")
         score = result.get("score")
         feedback = result.get("feedback")
         # bool is a subclass of int, but is not a valid report score.
