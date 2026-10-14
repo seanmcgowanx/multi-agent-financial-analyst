@@ -1,5 +1,7 @@
 """Earnings specialist: reported income statements, margins, filing metadata."""
 
+# process(task)  -- overrides Agent.process: use_tools(get_financials, get_recent_filings) -> findings text.
+
 from multi_agent.base import Agent
 
 

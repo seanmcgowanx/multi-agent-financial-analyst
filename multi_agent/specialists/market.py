@@ -1,5 +1,7 @@
 """Market specialist: price action, valuation context, macro backdrop."""
 
+# process(task)  -- overrides Agent.process: use_tools(get_price_history, get_fred_series) -> findings text.
+
 from multi_agent.base import Agent
 
 
