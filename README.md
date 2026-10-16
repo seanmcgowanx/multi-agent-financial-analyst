@@ -16,7 +16,8 @@ flowchart TD
     C -- route by label --> N[NewsAnalyst]
     C -- route by label --> K[MarketAnalyst]
     N --> NC[NewsChain: ingest, preprocess, classify, extract, summarize]
-    E --> T[Tools: yfinance, EDGAR, FRED, NewsAPI]
+    NC --> NT[get_company_news: NewsAPI, Yahoo fallback]
+    E --> T[Tools: yfinance, SEC EDGAR, FRED]
     K --> T
     E & N & K --> S[Coordinator: synthesize]
     S --> V[Evaluator]
