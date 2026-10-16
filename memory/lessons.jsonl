@@ -1,3 +1,7 @@
 {"lesson": "Plan for traceability: record each source link and date, define the start and end dates for every return calculation, and distinguish financial reporting periods from filing dates."}
 {"lesson": "Plan a final evidence audit that separates reported facts from interpretation and makes conclusions conditional on the evidence available."}
 {"lesson": "Plan the Risks section so each material uncertainty is paired with a conditional explanation of how it could affect the investment thesis, without presenting that effect as established fact."}
+{"lesson": "When writing the report, label which source supports each financial figure and state explicitly when filing metadata does not independently verify it."}
+{"lesson": "Add a discrepancy check before drafting: when sources report different values for the same measure, compare their dates and definitions, document the conflict, and avoid calculations that depend on an unresolved value."}
+{"lesson": "For market comparisons, use a consistent closing-price series, show the start and end prices alongside their dates, and reconcile conflicting quotes before calculating returns."}
+{"lesson": "Define and disclose the news review\u2019s search date, time window, and scope. If the coverage is too narrow to support an overall sentiment judgment, label sentiment unavailable rather than extrapolating."}
