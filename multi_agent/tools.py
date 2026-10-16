@@ -7,7 +7,7 @@ prompts.TOOL_PROTOCOL.
 
 # get_price_history(ticker, period)      -- yfinance
 # get_financials(ticker)                 -- yfinance income/balance summary
-# get_company_news(ticker, days)         -- NewsAPI (fallback: yfinance news)
+# get_company_news(ticker, days)         -- NewsAPI (fallback: yfinance news); NewsChain step, not in TOOLS
 # get_recent_filings(ticker, form_type)  -- SEC EDGAR
 # get_fred_series(series_id)             -- FRED (e.g. FEDFUNDS, CPIAUCSL)
 
@@ -148,11 +148,6 @@ def get_company_news(ticker, days=7):
     NewsAPI is used when configured; Yahoo Finance news is the fallback.
     Articles with known publication dates older than ``days`` are omitted.
     """
-    if not isinstance(ticker, str) or not ticker.strip():
-        raise ValueError("ticker must be a non-empty string")
-    if not isinstance(days, int) or isinstance(days, bool) or days < 1:
-        raise ValueError("days must be a positive integer")
-
     ticker = ticker.strip().upper()
     cutoff = datetime.now(timezone.utc) - timedelta(days=days)
     articles = []
@@ -181,10 +176,7 @@ def get_company_news(ticker, days=7):
 
     if not articles:
         provider = "Yahoo Finance"
-        try:
-            articles = yf.Ticker(ticker).news or []
-        except Exception:
-            raise RuntimeError("Yahoo Finance news request failed") from None
+        articles = yf.Ticker(ticker).news or []
 
     formatted = []
     for article in articles:
@@ -194,9 +186,7 @@ def get_company_news(ticker, days=7):
         published_at = None
         if isinstance(published, str):
             try:
-                published_at = datetime.fromisoformat(
-                    published.replace("Z", "+00:00")
-                )
+                published_at = datetime.fromisoformat(published.replace("Z", "+00:00"))
                 if published_at.tzinfo is None:
                     published_at = published_at.replace(tzinfo=timezone.utc)
                 published_at = published_at.astimezone(timezone.utc)
@@ -210,10 +200,14 @@ def get_company_news(ticker, days=7):
 
         source = article.get("source") or content.get("provider") or {}
         source_name = (
-            source.get("name") or source.get("displayName")
-            if isinstance(source, dict)
-            else source
-        ) or article.get("publisher") or "Unknown source"
+            (
+                source.get("name") or source.get("displayName")
+                if isinstance(source, dict)
+                else source
+            )
+            or article.get("publisher")
+            or "Unknown source"
+        )
         url = article.get("url") or content.get("canonicalUrl") or article.get("link")
         if isinstance(url, dict):
             url = url.get("url")
@@ -371,16 +365,6 @@ def get_fred_series(series_id):
 
 # Registry
 TOOLS = {
-    "get_company_news": {
-        "fn": get_company_news,
-        "description": (
-            "get_company_news(ticker, days=7): Up to five recent news articles "
-            "mentioning the ticker, with publication date, source, title, "
-            "snippet, and link when available. Uses NewsAPI when configured "
-            "and Yahoo Finance as a fallback. Treat headlines and snippets as "
-            "reported coverage, not verified facts or investment advice."
-        ),
-    },
     "get_recent_filings": {
         "fn": get_recent_filings,
         "description": (

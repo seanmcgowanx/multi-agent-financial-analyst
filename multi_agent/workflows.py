@@ -4,8 +4,8 @@
 # NewsChain.preprocess(articles)  -- LLM: dedupe, strip boilerplate.
 # NewsChain.classify(articles)    -- LLM: label each (earnings, product, legal, macro, ...) + sentiment.
 # NewsChain.extract(articles)     -- LLM: key facts, numbers, entities.
-# NewsChain.summarize(extracted)  -- LLM: concise news brief.
-# NewsChain.run(ticker)           -- runs the chain; returns every intermediate step for the notebook.
+# NewsChain.summarize(extracted, ticker, task) -- LLM: news brief focused on the task.
+# NewsChain.run(ticker, task)     -- runs the chain; returns every intermediate step for the notebook.
 # Evaluator.evaluate(report, ticker) -- scores a report 1-10 with feedback; raises on bad input or reply.
 
 import json
@@ -28,65 +28,44 @@ class NewsChain(Agent):
         super().__init__(name="News Chain", role="financial news analysis specialist")
 
     def ingest(self, ticker):
-        """Fetch recent news for a ticker without making an LLM call."""
-        if not isinstance(ticker, str) or not ticker.strip():
-            raise ValueError("ticker must be a non-empty string")
-        return get_company_news(ticker.strip().upper())
-
-    def _apply_prompt(self, prompt, articles):
-        if not isinstance(articles, str) or not articles.strip():
-            raise ValueError("articles must be a non-empty string")
-        return self.call_llm(prompt.format(articles=articles))
+        """Return the recent news for a ticker as text (no LLM call)."""
+        return get_company_news(ticker)
 
     def preprocess(self, articles):
-        """Deduplicate articles and remove boilerplate while preserving citations."""
-        return self._apply_prompt(NEWS_CHAIN_PREPROCESS, articles)
+        """Return the articles deduplicated, without boilerplate, citations kept."""
+        return self.call_llm(NEWS_CHAIN_PREPROCESS.format(articles=articles))
 
     def classify(self, articles):
-        """Label article topics and coverage sentiment."""
-        return self._apply_prompt(NEWS_CHAIN_CLASSIFY, articles)
+        """Return the articles labeled by topic and coverage sentiment."""
+        return self.call_llm(NEWS_CHAIN_CLASSIFY.format(articles=articles))
 
     def extract(self, articles):
-        """Extract attributed claims, figures, entities, and evidence gaps."""
-        return self._apply_prompt(NEWS_CHAIN_EXTRACT, articles)
+        """Return the attributed claims, figures, entities, and evidence gaps."""
+        return self.call_llm(NEWS_CHAIN_EXTRACT.format(articles=articles))
 
-    def summarize(self, extracted, ticker):
-        """Summarize extracted news findings for the requested ticker."""
-        if not isinstance(ticker, str) or not ticker.strip():
-            raise ValueError("ticker must be a non-empty string")
-        if not isinstance(extracted, str) or not extracted.strip():
-            raise ValueError("extracted must be a non-empty string")
+    def summarize(self, extracted, ticker, task):
+        """Return a news brief for the ticker, focused on the task."""
         prompt = NEWS_CHAIN_SUMMARIZE.format(
-            articles=extracted, ticker=ticker.strip().upper()
+            articles=extracted, ticker=ticker, task=task
         )
         return self.call_llm(prompt)
 
-    def run(self, ticker):
-        """Return the raw input and each intermediate chain result."""
-        ticker = ticker.strip().upper() if isinstance(ticker, str) else ticker
+    def run(self, ticker, task):
+        """Return a dict with the raw news and every intermediate chain result."""
         raw = self.ingest(ticker)
-        if raw.startswith("No recent news found for "):
-            result = {
-                "ticker": ticker,
-                "raw": raw,
-                "preprocessed": None,
-                "classified": None,
-                "extracted": None,
-                "summary": raw,
-            }
-        else:
-            preprocessed = self.preprocess(raw)
-            classified = self.classify(preprocessed)
-            extracted = self.extract(classified)
-            summary = self.summarize(extracted, ticker)
-            result = {
-                "ticker": ticker,
-                "raw": raw,
-                "preprocessed": preprocessed,
-                "classified": classified,
-                "extracted": extracted,
-                "summary": summary,
-            }
+        result = {
+            "ticker": ticker,
+            "raw": raw,
+            "preprocessed": None,
+            "classified": None,
+            "extracted": None,
+            "summary": raw,
+        }
+        if not raw.startswith("No recent news found for "):
+            result["preprocessed"] = self.preprocess(raw)
+            result["classified"] = self.classify(result["preprocessed"])
+            result["extracted"] = self.extract(result["classified"])
+            result["summary"] = self.summarize(result["extracted"], ticker, task)
         self.memory.append({"task": f"news chain {ticker}", "result": result})
         return result
 

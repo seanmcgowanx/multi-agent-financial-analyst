@@ -8,7 +8,7 @@ from .market import MarketAnalyst
 from .news import NewsAnalyst
 
 SPECIALISTS = {
-	"earnings": EarningsAnalyst,
-	"market": MarketAnalyst,
-	"news": NewsAnalyst,
+    "earnings": EarningsAnalyst,
+    "market": MarketAnalyst,
+    "news": NewsAnalyst,
 }
