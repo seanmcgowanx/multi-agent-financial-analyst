@@ -19,7 +19,7 @@ client = openai.OpenAI(api_key=OPENAI_API_KEY)
 DEFAULT_MODEL = "gpt-6-luna"
 
 # Evaluator
-EVAL_THRESHOLD = 7  # passing score on the evaluator's 1-10 scale
+EVAL_THRESHOLD = 9  # passing score (1-10); first drafts at 8 still had real gaps
 MAX_ROUNDS = 3  # most drafts per run: the first plus up to 2 revisions
 
 # Tools

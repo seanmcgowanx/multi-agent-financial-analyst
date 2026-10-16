@@ -65,7 +65,8 @@ def get_price_history(ticker, period="6mo"):
         "Return basis: percentage change in closing prices; "
         "dividend income is not included. This is not a total return.\n"
         f"Missing closing prices omitted: {missing_count}\n"
-        f"Closes: {points}"
+        f"Closes: {points}\n"
+        f"Source: https://finance.yahoo.com/quote/{ticker}/history"
     )
     return price_summary
 
@@ -137,7 +138,8 @@ def get_financials(ticker):
     lines.append(
         "Margins calculated from same-quarter profit divided by revenue. "
         "Unavailable figures are not zero. Balance sheet and cash flow are "
-        "not included. Source: Yahoo Finance quarterly income statements."
+        "not included. Source: Yahoo Finance quarterly income statements, "
+        f"https://finance.yahoo.com/quote/{ticker}/financials"
     )
     return "\n".join(lines)
 
@@ -152,6 +154,7 @@ def get_company_news(ticker, days=7):
     cutoff = datetime.now(timezone.utc) - timedelta(days=days)
     articles = []
     provider = "NewsAPI"
+    newsapi_error = None
 
     if NEWSAPI_KEY:
         try:
@@ -167,15 +170,19 @@ def get_company_news(ticker, days=7):
                 headers={"X-Api-Key": NEWSAPI_KEY},
                 timeout=20,
             )
-            response.raise_for_status()
             payload = response.json()
             if payload.get("status") == "ok":
                 articles = payload.get("articles", [])
-        except (requests.RequestException, ValueError, TypeError):
-            articles = []
+            else:
+                newsapi_error = payload.get("message") or f"HTTP {response.status_code}"
+        except (requests.RequestException, ValueError, TypeError) as e:
+            newsapi_error = str(e)
 
     if not articles:
         provider = "Yahoo Finance"
+        # Name the NewsAPI failure so an empty result isn't mistaken for no news.
+        if newsapi_error:
+            provider += f" (NewsAPI failed: {newsapi_error})"
         articles = yf.Ticker(ticker).news or []
 
     formatted = []

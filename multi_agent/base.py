@@ -3,7 +3,7 @@
 # call_llm(prompt, ...)    -- one LLM call; use reasoning_effort, not temperature.
 # process(task)            -- specialists replace this; Coordinator.route calls it via send_to.
 # send_to(other, message)  -- hands a message to another agent's process.
-# use_tools(task)          -- ReAct tool loop, up to MAX_TOOL_STEPS; steps kept in self.last_trace.
+# use_tools(task)          -- ReAct tool loop, up to MAX_TOOL_STEPS; each call's steps appended to self.traces.
 
 import json
 
@@ -25,6 +25,7 @@ class Agent:
         self.model = model
         self.tools = tools or []
         self.memory = []  # in-session history of {"task", "result"}
+        self.traces = []  # one list of tool steps per use_tools call
 
     def call_llm(self, prompt, max_tokens=None, reasoning_effort=None, json_mode=False):
         """Returns the model's reply as a string (a JSON string with json_mode)."""
@@ -75,15 +76,16 @@ class Agent:
         """ReAct loop: the model picks a tool, we run it, and feed back the result.
 
         Returns the final answer as a string.
-        The steps (thought, tool, args, result) are kept in self.last_trace so
-        the notebook can show the agent's decisions.
+        The steps (thought, tool, args, result) are appended to self.traces, one
+        list per call, so the notebook can show the agent's decisions.
         """
         descriptions = "\n".join(f"- {TOOLS[n]['description']}" for n in self.tools)
         protocol = TOOL_PROTOCOL.format(tool_descriptions=descriptions)
-        self.last_trace = []
+        trace = []
+        self.traces.append(trace)
 
         for _ in range(MAX_TOOL_STEPS):
-            history = "\n".join(json.dumps(step) for step in self.last_trace)
+            history = "\n".join(json.dumps(step) for step in trace)
             prompt = f"{protocol}\n\nTask: {task}\n\nSteps so far:\n{history or 'none'}"
             raw = self.call_llm(
                 prompt, reasoning_effort=reasoning_effort, json_mode=True
@@ -92,7 +94,7 @@ class Agent:
             try:
                 reply = json.loads(raw)
             except json.JSONDecodeError:
-                self.last_trace.append({"error": f"Invalid JSON reply: {raw[:200]}"})
+                trace.append({"error": f"Invalid JSON reply: {raw[:200]}"})
                 continue
 
             if "final" in reply:
@@ -108,7 +110,7 @@ class Agent:
                 except Exception as e:  # noqa: BLE001 -- any tool failure goes back to the model
                     result = f"Tool error: {e}"
 
-            self.last_trace.append(
+            trace.append(
                 {
                     "thought": reply.get("thought"),
                     "tool": name,
@@ -118,7 +120,7 @@ class Agent:
             )
 
         # If max steps is reached, ask for a final answer from what was gathered
-        history = "\n".join(json.dumps(step) for step in self.last_trace)
+        history = "\n".join(json.dumps(step) for step in trace)
         # Repeat the tool descriptions and rules here, since the JSON protocol is left out
         final = self.call_llm(
             f"Tools used:\n{descriptions}\n\n{TOOL_RULES}\n\n"

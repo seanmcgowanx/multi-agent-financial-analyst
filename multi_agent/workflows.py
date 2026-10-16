@@ -11,6 +11,7 @@
 import json
 
 from multi_agent.base import Agent
+from multi_agent.config import EVAL_THRESHOLD
 from multi_agent.prompts import (
     EVALUATOR,
     NEWS_CHAIN_CLASSIFY,
@@ -90,7 +91,9 @@ class Evaluator(Agent):
             raise ValueError("ticker must be a non-empty string")
 
         ticker = ticker.strip().upper()
-        prompt = EVALUATOR.format(report=report, ticker=ticker)
+        prompt = EVALUATOR.format(
+            report=report, ticker=ticker, threshold=EVAL_THRESHOLD
+        )
         raw = self.call_llm(prompt, json_mode=True)
         try:
             result = json.loads(raw)
