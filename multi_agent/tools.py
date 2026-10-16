@@ -7,16 +7,17 @@ prompts.TOOL_PROTOCOL.
 
 # get_price_history(ticker, period)      -- yfinance
 # get_financials(ticker)                 -- yfinance income/balance summary
-# get_company_news(ticker, days)         -- NewsAPI (fallback: yfinance news)
+# get_company_news(ticker, days)         -- NewsAPI (fallback: yfinance news); NewsChain step, not in TOOLS
 # get_recent_filings(ticker, form_type)  -- SEC EDGAR
 # get_fred_series(series_id)             -- FRED (e.g. FEDFUNDS, CPIAUCSL)
 
 import math
+from datetime import datetime, timedelta, timezone
 
 import requests
 import yfinance as yf
 
-from multi_agent.config import FRED_API_KEY, SEC_USER_AGENT
+from multi_agent.config import FRED_API_KEY, NEWSAPI_KEY, SEC_USER_AGENT
 
 
 def get_price_history(ticker, period="6mo"):
@@ -139,6 +140,104 @@ def get_financials(ticker):
         "not included. Source: Yahoo Finance quarterly income statements."
     )
     return "\n".join(lines)
+
+
+def get_company_news(ticker, days=7):
+    """Return up to five recent ticker-related news articles.
+
+    NewsAPI is used when configured; Yahoo Finance news is the fallback.
+    Articles with known publication dates older than ``days`` are omitted.
+    """
+    ticker = ticker.strip().upper()
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+    articles = []
+    provider = "NewsAPI"
+
+    if NEWSAPI_KEY:
+        try:
+            response = requests.get(
+                "https://newsapi.org/v2/everything",
+                params={
+                    "q": ticker,
+                    "from": cutoff.date().isoformat(),
+                    "sortBy": "publishedAt",
+                    "pageSize": 5,
+                    "language": "en",
+                },
+                headers={"X-Api-Key": NEWSAPI_KEY},
+                timeout=20,
+            )
+            response.raise_for_status()
+            payload = response.json()
+            if payload.get("status") == "ok":
+                articles = payload.get("articles", [])
+        except (requests.RequestException, ValueError, TypeError):
+            articles = []
+
+    if not articles:
+        provider = "Yahoo Finance"
+        articles = yf.Ticker(ticker).news or []
+
+    formatted = []
+    for article in articles:
+        content = article.get("content") or article
+        published = article.get("publishedAt") or content.get("pubDate")
+        timestamp = article.get("providerPublishTime")
+        published_at = None
+        if isinstance(published, str):
+            try:
+                published_at = datetime.fromisoformat(published.replace("Z", "+00:00"))
+                if published_at.tzinfo is None:
+                    published_at = published_at.replace(tzinfo=timezone.utc)
+                published_at = published_at.astimezone(timezone.utc)
+            except ValueError:
+                published_at = None
+        elif isinstance(timestamp, (int, float)):
+            published_at = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+
+        if published_at is not None and published_at < cutoff:
+            continue
+
+        source = article.get("source") or content.get("provider") or {}
+        source_name = (
+            (
+                source.get("name") or source.get("displayName")
+                if isinstance(source, dict)
+                else source
+            )
+            or article.get("publisher")
+            or "Unknown source"
+        )
+        url = article.get("url") or content.get("canonicalUrl") or article.get("link")
+        if isinstance(url, dict):
+            url = url.get("url")
+        title = article.get("title") or content.get("title") or "Untitled"
+        summary = article.get("description") or content.get("summary")
+        date_label = (
+            published_at.strftime("%Y-%m-%d %H:%M UTC")
+            if published_at
+            else "date unavailable"
+        )
+        formatted.append(
+            (
+                published_at or datetime.min.replace(tzinfo=timezone.utc),
+                f"{date_label} | {source_name}: {title}"
+                + (f"\n{summary}" if summary else "")
+                + (f"\n{url}" if url else ""),
+            )
+        )
+
+    formatted.sort(key=lambda item: item[0], reverse=True)
+    if not formatted:
+        return (
+            f"No recent news found for {ticker} in the past {days} days. "
+            f"Source checked: {provider}."
+        )
+
+    return (
+        f"{ticker}: latest news from the past {days} days (source: {provider})\n"
+        + "\n\n".join(item[1] for item in formatted[:5])
+    )
 
 
 def get_recent_filings(ticker, form_type="10-Q"):

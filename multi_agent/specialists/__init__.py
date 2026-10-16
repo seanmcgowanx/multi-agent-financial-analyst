@@ -5,6 +5,10 @@ SPECIALISTS maps the routing label to the class, used by Coordinator.route().
 
 from .earnings import EarningsAnalyst
 from .market import MarketAnalyst
+from .news import NewsAnalyst
 
-# Add news when its implementation becomes available.
-SPECIALISTS = {"earnings": EarningsAnalyst, "market": MarketAnalyst}
+SPECIALISTS = {
+    "earnings": EarningsAnalyst,
+    "market": MarketAnalyst,
+    "news": NewsAnalyst,
+}
